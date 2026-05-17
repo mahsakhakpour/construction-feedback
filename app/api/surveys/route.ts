@@ -28,7 +28,14 @@ export async function POST(request: NextRequest) {
     
     const newSurvey = db.addSurvey(body)
     return NextResponse.json(newSurvey, { status: 201 })
-  } catch (error) {
+  } catch (error: any) {
+    if (error.message === 'DUPLICATE_NAME') {
+      return NextResponse.json(
+        { error: 'This name has already been submitted. Each user can only vote once.' },
+        { status: 409 }
+      )
+    }
+    
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

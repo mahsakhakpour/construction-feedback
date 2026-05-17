@@ -89,7 +89,7 @@ export default function SurveyForm() {
             exit={{ opacity: 0, y: -20 }}
             className="fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg"
           >
-            Survey submitted successfully! 🎉
+            Survey submitted successfully!
           </motion.div>
         )}
       </AnimatePresence>

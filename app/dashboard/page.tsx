@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import PieChart from '@/components/charts/PieChart'
 import { SurveyStats } from '@/types'
 import { Users, BarChart3, PieChart as PieChartIcon } from 'lucide-react'
+import ExportButton from '../../components/ExportButton'
 
 export default function DashboardPage() {
   const { data: stats, isLoading } = useQuery<SurveyStats>({
@@ -34,11 +35,15 @@ export default function DashboardPage() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
+        className="flex justify-between items-center"
       >
-        <h1 className="text-3xl font-bold">Analytics Dashboard</h1>
-        <p className="text-gray-600 dark:text-gray-400 mt-2">
-          Survey statistics and insights
-        </p>
+        <div>
+          <h1 className="text-3xl font-bold">Analytics Dashboard</h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-2">
+            Survey statistics and insights
+          </p>
+        </div>
+        <ExportButton />
       </motion.div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">

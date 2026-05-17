@@ -27,6 +27,14 @@ export const db = {
   },
   
   addSurvey: (survey: Omit<Survey, 'id' | 'timestamp'>) => {
+    const isDuplicate = surveys.some(
+      existing => existing.name.toLowerCase() === survey.name.toLowerCase()
+    )
+    
+    if (isDuplicate) {
+      throw new Error('DUPLICATE_NAME')
+    }
+    
     const newSurvey: Survey = {
       ...survey,
       id: Date.now().toString(),
