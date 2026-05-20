@@ -1,54 +1,65 @@
 'use client'
 
-import { PieChart as RePieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts'
+import { PieChart as RechartsPie, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts'
 import { SurveyStats } from '@/types'
 
 interface PieChartProps {
-  data: SurveyStats
+  data?: SurveyStats
 }
 
-const COLORS = ['#3b82f6', '#10b981', '#f59e0b']
+const COLORS = ['#3b82f6', '#22c55e', '#eab308']
 
 export default function PieChart({ data }: PieChartProps) {
-  const chartData = [
-    { name: 'MySQL', value: data.mysql },
-    { name: 'Android', value: data.android },
-    { name: 'JavaScript', value: data.javascript },
-  ]
-
-  const total = data.total
-
-  if (total === 0) {
+  if (!data) {
     return (
-      <div className="flex items-center justify-center h-[400px] text-gray-500">
+      <div className="flex justify-center items-center h-64 text-gray-500">
         No data available
       </div>
     )
   }
 
+  const total = (data.residential || 0) + (data.commercial || 0) + (data.industrial || 0)
+  
+  const chartData = [
+    { name: 'Residential', value: data.residential || 0 },
+    { name: 'Commercial', value: data.commercial || 0 },
+    { name: 'Industrial', value: data.industrial || 0 },
+  ]
+
+  const hasData = chartData.some(item => item.value > 0)
+
+  if (!hasData) {
+    return (
+      <div className="flex justify-center items-center h-64 text-gray-500">
+        No data to display
+      </div>
+    )
+  }
+
+  const renderLabel = (entry: any) => {
+    const percent = ((entry.value / total) * 100).toFixed(0)
+    return `${entry.name} ${percent}%`
+  }
+
   return (
-    <ResponsiveContainer width="100%" height={400}>
-      <RePieChart>
+    <ResponsiveContainer width="100%" height={300}>
+      <RechartsPie>
         <Pie
           data={chartData}
           cx="50%"
           cy="50%"
           labelLine={false}
-          label={(entry: any) => {
-            const percent = (entry.value / total) * 100
-            return `${entry.name}: ${percent.toFixed(1)}%`
-          }}
-          outerRadius={150}
-          fill="#8884d8"
+          label={renderLabel}
+          outerRadius={80}
           dataKey="value"
         >
           {chartData.map((entry, index) => (
             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
           ))}
         </Pie>
-        <Tooltip formatter={(value: any) => [`${value} votes`, 'Count']} />
+        <Tooltip />
         <Legend />
-      </RePieChart>
+      </RechartsPie>
     </ResponsiveContainer>
   )
 }

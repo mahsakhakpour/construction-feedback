@@ -9,13 +9,15 @@ if (typeof window !== 'undefined') {
   if (stored) {
     surveys = JSON.parse(stored)
   } else {
-    // Sample data for demo
+    // Sample data for construction company clients
     surveys = [
-      { id: '1', name: 'John Smith', course: 'javascript', timestamp: new Date().toISOString() },
-      { id: '2', name: 'Sarah Johnson', course: 'android', timestamp: new Date().toISOString() },
-      { id: '3', name: 'Michael Brown', course: 'android', timestamp: new Date().toISOString() },
-      { id: '4', name: 'Emily Davis', course: 'mysql', timestamp: new Date().toISOString() },
-      { id: '5', name: 'David Wilson', course: 'mysql', timestamp: new Date().toISOString() },
+      { id: '1', name: 'ABC Construction', course: 'commercial', timestamp: new Date().toISOString() },
+      { id: '2', name: 'Smith Builders', course: 'residential', timestamp: new Date().toISOString() },
+      { id: '3', name: 'Industrial Solutions Inc', course: 'industrial', timestamp: new Date().toISOString() },
+      { id: '4', name: 'City Developments Ltd', course: 'commercial', timestamp: new Date().toISOString() },
+      { id: '5', name: 'Home Crafters', course: 'residential', timestamp: new Date().toISOString() },
+      { id: '6', name: 'MetalFrame Industries', course: 'industrial', timestamp: new Date().toISOString() },
+      { id: '7', name: 'Coastal Contractors', course: 'commercial', timestamp: new Date().toISOString() },
     ]
     localStorage.setItem('surveys', JSON.stringify(surveys))
   }
@@ -48,17 +50,21 @@ export const db = {
   },
   
   getStats: (): SurveyStats => {
-    const stats = {
-      mysql: 0,
-      android: 0,
-      javascript: 0,
-      total: surveys.length,
-    }
+    let residential = 0
+    let commercial = 0
+    let industrial = 0
     
     surveys.forEach(survey => {
-      stats[survey.course]++
+      if (survey.course === 'residential') residential++
+      if (survey.course === 'commercial') commercial++
+      if (survey.course === 'industrial') industrial++
     })
     
-    return stats
+    return {
+      residential: residential,
+      commercial: commercial,
+      industrial: industrial,
+      total: surveys.length,
+    }
   },
 }

@@ -8,10 +8,10 @@ import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
 import { SurveyFormData } from '@/types'
 
-const courses = [
-  { value: 'mysql', label: 'MySQL', color: 'bg-blue-500' },
-  { value: 'android', label: 'Android', color: 'bg-green-500' },
-  { value: 'javascript', label: 'JavaScript', color: 'bg-yellow-500' },
+const projectTypes = [
+  { value: 'residential', label: 'Residential Construction', color: 'bg-blue-500' },
+  { value: 'commercial', label: 'Commercial Construction', color: 'bg-green-500' },
+  { value: 'industrial', label: 'Industrial Construction', color: 'bg-yellow-500' },
 ]
 
 export default function SurveyForm() {
@@ -26,6 +26,12 @@ export default function SurveyForm() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       })
+      
+      if (!res.ok) {
+        const error = await res.json()
+        throw new Error(error.error || 'Submission failed')
+      }
+      
       return res.json()
     },
     onSuccess: () => {
@@ -35,16 +41,19 @@ export default function SurveyForm() {
       setShowSuccess(true)
       setTimeout(() => setShowSuccess(false), 3000)
     },
+    onError: (error: Error) => {
+      alert(error.message)
+    },
   })
 
   return (
     <div className="space-y-6">
       <form onSubmit={handleSubmit((data) => mutation.mutate(data))} className="space-y-6">
         <div>
-          <label className="block text-sm font-medium mb-2">Full Name</label>
+          <label className="block text-sm font-medium mb-2">Client Name</label>
           <Input
-            {...register('name', { required: 'Name is required' })}
-            placeholder="e.g., John Smith"
+            {...register('name', { required: 'Client name is required' })}
+            placeholder="e.g., ABC Construction"
           />
           {errors.name && (
             <p className="mt-1 text-sm text-red-500">{errors.name.message}</p>
@@ -52,18 +61,18 @@ export default function SurveyForm() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-3">Preferred Platform</label>
+          <label className="block text-sm font-medium mb-3">Project Type</label>
           <div className="space-y-3">
-            {courses.map((course) => (
-              <label key={course.value} className="flex items-center gap-3 cursor-pointer">
+            {projectTypes.map((type) => (
+              <label key={type.value} className="flex items-center gap-3 cursor-pointer">
                 <input
                   type="radio"
-                  value={course.value}
-                  {...register('course', { required: 'Please select a platform' })}
+                  value={type.value}
+                  {...register('course', { required: 'Please select a project type' })}
                   className="w-4 h-4 text-blue-600"
                 />
-                <span className={`w-3 h-3 rounded-full ${course.color}`} />
-                <span className="text-sm font-medium">{course.label}</span>
+                <span className={`w-3 h-3 rounded-full ${type.color}`} />
+                <span className="text-sm font-medium">{type.label}</span>
               </label>
             ))}
           </div>
@@ -77,7 +86,7 @@ export default function SurveyForm() {
           disabled={mutation.isPending}
           className="w-full"
         >
-          {mutation.isPending ? 'Submitting...' : 'Submit Survey'}
+          {mutation.isPending ? 'Submitting...' : 'Submit Feedback'}
         </Button>
       </form>
 
@@ -89,7 +98,7 @@ export default function SurveyForm() {
             exit={{ opacity: 0, y: -20 }}
             className="fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg"
           >
-            Survey submitted successfully!
+            Feedback submitted successfully!
           </motion.div>
         )}
       </AnimatePresence>

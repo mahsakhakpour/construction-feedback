@@ -6,15 +6,35 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import SurveyForm from '@/components/forms/SurveyForm'
 import PieChart from '@/components/charts/PieChart'
 import { SurveyStats } from '@/types'
+import ExportButton from '@/components/ExportButton'
 
 export default function HomePage() {
-  const { data: stats, isLoading } = useQuery<SurveyStats>({
+  const { data: stats, isLoading, error } = useQuery<SurveyStats>({
     queryKey: ['stats'],
     queryFn: async () => {
       const res = await fetch('/api/surveys?stats=true')
+      if (!res.ok) {
+        throw new Error('Failed to fetch stats')
+      }
       return res.json()
     },
   })
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <p className="text-red-500">Error loading data</p>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-8">
@@ -24,10 +44,10 @@ export default function HomePage() {
         transition={{ duration: 0.5 }}
       >
         <h1 className="text-4xl font-bold text-center mb-2">
-          Course Platform Survey
+          Construction Project Feedback
         </h1>
         <p className="text-center text-gray-600 dark:text-gray-400">
-          Share your preference for BCIT course platforms
+          Share your feedback on construction project types
         </p>
       </motion.div>
 
@@ -39,7 +59,7 @@ export default function HomePage() {
         >
           <Card>
             <CardHeader>
-              <CardTitle>Submit Your Opinion</CardTitle>
+              <CardTitle>Submit Your Feedback</CardTitle>
             </CardHeader>
             <CardContent>
               <SurveyForm />
@@ -54,37 +74,37 @@ export default function HomePage() {
         >
           <Card>
             <CardHeader>
-              <CardTitle>Survey Results</CardTitle>
+              <CardTitle>Feedback Results</CardTitle>
             </CardHeader>
             <CardContent>
-              {isLoading ? (
-                <div className="flex justify-center py-12">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
-                </div>
-              ) : stats && stats.total > 0 ? (
+              {stats && stats.total > 0 ? (
                 <>
                   <PieChart data={stats} />
                   <div className="mt-6 grid grid-cols-3 gap-4 text-center">
                     <div>
-                      <p className="text-2xl font-bold text-blue-500">{stats.mysql}</p>
-                      <p className="text-sm text-gray-600">MySQL</p>
+                      <p className="text-2xl font-bold text-blue-500">{stats.residential || 0}</p>
+                      <p className="text-sm text-gray-600">Residential</p>
                     </div>
                     <div>
-                      <p className="text-2xl font-bold text-green-500">{stats.android}</p>
-                      <p className="text-sm text-gray-600">Android</p>
+                      <p className="text-2xl font-bold text-green-500">{stats.commercial || 0}</p>
+                      <p className="text-sm text-gray-600">Commercial</p>
                     </div>
                     <div>
-                      <p className="text-2xl font-bold text-yellow-500">{stats.javascript}</p>
-                      <p className="text-sm text-gray-600">JavaScript</p>
+                      <p className="text-2xl font-bold text-yellow-500">{stats.industrial || 0}</p>
+                      <p className="text-sm text-gray-600">Industrial</p>
                     </div>
                   </div>
                 </>
               ) : (
-                <p className="text-center text-gray-500 py-8">No surveys submitted yet</p>
+                <p className="text-center text-gray-500 py-8">No feedback submitted yet</p>
               )}
             </CardContent>
           </Card>
         </motion.div>
+      </div>
+      
+      <div className="flex justify-center">
+        <ExportButton />
       </div>
     </div>
   )
