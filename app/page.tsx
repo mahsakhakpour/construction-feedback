@@ -9,32 +9,13 @@ import { SurveyStats } from '@/types'
 import ExportButton from '@/components/ExportButton'
 
 export default function HomePage() {
-  const { data: stats, isLoading, error } = useQuery<SurveyStats>({
+  const { data: stats, isLoading } = useQuery<SurveyStats>({
     queryKey: ['stats'],
     queryFn: async () => {
       const res = await fetch('/api/surveys?stats=true')
-      if (!res.ok) {
-        throw new Error('Failed to fetch stats')
-      }
       return res.json()
     },
   })
-
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
-      </div>
-    )
-  }
-
-  if (error) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <p className="text-red-500">Error loading data</p>
-      </div>
-    )
-  }
 
   return (
     <div className="space-y-8">
@@ -77,7 +58,11 @@ export default function HomePage() {
               <CardTitle>Feedback Results</CardTitle>
             </CardHeader>
             <CardContent>
-              {stats && stats.total > 0 ? (
+              {isLoading ? (
+                <div className="flex justify-center py-12">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+                </div>
+              ) : stats && stats.total > 0 ? (
                 <>
                   <PieChart data={stats} />
                   <div className="mt-6 grid grid-cols-3 gap-4 text-center">

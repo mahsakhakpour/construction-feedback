@@ -1,3 +1,4 @@
+import 'leaflet/dist/leaflet.css'
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
@@ -8,8 +9,8 @@ import Providers from '@/components/Providers'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Course Platform Analytics',
-  description: 'Advanced survey analytics for course platforms',
+  title: 'Construction Feedback Dashboard',
+  description: 'Collect and analyze client feedback for construction projects - Residential, Commercial, Industrial',
 }
 
 export default function RootLayout({

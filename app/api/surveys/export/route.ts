@@ -12,10 +12,11 @@ export async function GET() {
   }
   
   const csvRows = [
-    ['Name', 'Course', 'Timestamp'],
+    ['Name', 'Project Type', 'Address', 'Timestamp'],
     ...surveys.map(survey => [
       survey.name,
-      survey.course,
+      survey.course === 'residential' ? 'Residential' : survey.course === 'commercial' ? 'Commercial' : 'Industrial',
+      survey.address || '',
       survey.timestamp
     ])
   ]

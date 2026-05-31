@@ -9,16 +9,8 @@ if (typeof window !== 'undefined') {
   if (stored) {
     surveys = JSON.parse(stored)
   } else {
-    // Sample data for construction company clients
-    surveys = [
-      { id: '1', name: 'ABC Construction', course: 'commercial', timestamp: new Date().toISOString() },
-      { id: '2', name: 'Smith Builders', course: 'residential', timestamp: new Date().toISOString() },
-      { id: '3', name: 'Industrial Solutions Inc', course: 'industrial', timestamp: new Date().toISOString() },
-      { id: '4', name: 'City Developments Ltd', course: 'commercial', timestamp: new Date().toISOString() },
-      { id: '5', name: 'Home Crafters', course: 'residential', timestamp: new Date().toISOString() },
-      { id: '6', name: 'MetalFrame Industries', course: 'industrial', timestamp: new Date().toISOString() },
-      { id: '7', name: 'Coastal Contractors', course: 'commercial', timestamp: new Date().toISOString() },
-    ]
+    // Empty initial data - no hardcoded addresses
+    surveys = []
     localStorage.setItem('surveys', JSON.stringify(surveys))
   }
 }

@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
 import { SurveyFormData } from '@/types'
+import { geocodeAddress } from '@/lib/geocode'
 
 const projectTypes = [
   { value: 'residential', label: 'Residential Construction', color: 'bg-blue-500' },
@@ -16,15 +17,33 @@ const projectTypes = [
 
 export default function SurveyForm() {
   const [showSuccess, setShowSuccess] = useState(false)
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<SurveyFormData>()
+  const [isGeocoding, setIsGeocoding] = useState(false)
+  const { register, handleSubmit, reset, formState: { errors }, setError } = useForm<SurveyFormData>()
   const queryClient = useQueryClient()
 
   const mutation = useMutation({
     mutationFn: async (data: SurveyFormData) => {
+      setIsGeocoding(true)
+      
+      // Geocode the address to get coordinates
+      const coords = await geocodeAddress(data.address)
+      
+      if (!coords) {
+        throw new Error('Could not find location. Please enter a valid address.')
+      }
+      
+      const payload = {
+        name: data.name,
+        course: data.course,
+        address: data.address,
+        lat: coords.lat,
+        lng: coords.lng
+      }
+      
       const res = await fetch('/api/surveys', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
+        body: JSON.stringify(payload),
       })
       
       if (!res.ok) {
@@ -44,11 +63,18 @@ export default function SurveyForm() {
     onError: (error: Error) => {
       alert(error.message)
     },
+    onSettled: () => {
+      setIsGeocoding(false)
+    },
   })
+
+  const onSubmit = (data: SurveyFormData) => {
+    mutation.mutate(data)
+  }
 
   return (
     <div className="space-y-6">
-      <form onSubmit={handleSubmit((data) => mutation.mutate(data))} className="space-y-6">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <div>
           <label className="block text-sm font-medium mb-2">Client Name</label>
           <Input
@@ -58,6 +84,20 @@ export default function SurveyForm() {
           {errors.name && (
             <p className="mt-1 text-sm text-red-500">{errors.name.message}</p>
           )}
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-2">Project Location</label>
+          <Input
+            {...register('address', { required: 'Project location is required' })}
+            placeholder="e.g., #123, Vancouver, BC, Canada"
+          />
+          {errors.address && (
+            <p className="mt-1 text-sm text-red-500">{errors.address.message}</p>
+          )}
+          <p className="mt-1 text-xs text-gray-500">
+            Enter city and state, or full street address
+          </p>
         </div>
 
         <div>
@@ -83,10 +123,10 @@ export default function SurveyForm() {
 
         <Button
           type="submit"
-          disabled={mutation.isPending}
+          disabled={mutation.isPending || isGeocoding}
           className="w-full"
         >
-          {mutation.isPending ? 'Submitting...' : 'Submit Feedback'}
+          {isGeocoding ? 'Finding location...' : mutation.isPending ? 'Submitting...' : 'Submit Feedback'}
         </Button>
       </form>
 

@@ -4,11 +4,27 @@ import { useQuery } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import PieChart from '@/components/charts/PieChart'
-import { SurveyStats } from '@/types'
+import { SurveyStats, Survey } from '@/types'
 import { Users, BarChart3, PieChart as PieChartIcon } from 'lucide-react'
 import ExportButton from '@/components/ExportButton'
+import dynamic from 'next/dynamic'
+import { useEffect, useState } from 'react'
+
+// Dynamic import for map to avoid SSR issues
+const ProjectDistributionMap = dynamic<{ locations: any[] }>(
+  () => import('@/components/ProjectDistributionMap').then(mod => mod.default),
+  { 
+    ssr: false,
+    loading: () => (
+      <div style={{ height: '450px', background: '#f0f0f0', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <p style={{ color: '#666' }}>Loading map...</p>
+      </div>
+    )
+  }
+)
 
 export default function DashboardPage() {
+  const [isClient, setIsClient] = useState(false)
   const { data: stats, isLoading } = useQuery<SurveyStats>({
     queryKey: ['stats'],
     queryFn: async () => {
@@ -16,6 +32,18 @@ export default function DashboardPage() {
       return res.json()
     },
   })
+
+  const { data: surveys } = useQuery<Survey[]>({
+    queryKey: ['surveys'],
+    queryFn: async () => {
+      const res = await fetch('/api/surveys')
+      return res.json()
+    },
+  })
+
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
 
   const statsCards = [
     { title: 'Total Clients', value: stats?.total || 0, icon: Users, color: 'bg-blue-500' },
@@ -29,6 +57,17 @@ export default function DashboardPage() {
     commercial: ((stats.commercial / stats.total) * 100).toFixed(1),
     industrial: ((stats.industrial / stats.total) * 100).toFixed(1),
   } : null
+
+  const locations = (surveys || [])
+    .filter(survey => survey.lat && survey.lng)
+    .map(survey => ({
+      id: survey.id,
+      name: survey.name,
+      projectType: survey.course,
+      lat: survey.lat!,
+      lng: survey.lng!,
+      address: survey.address || ''
+    }))
 
   return (
     <div className="space-y-8">
@@ -70,6 +109,23 @@ export default function DashboardPage() {
           </motion.div>
         ))}
       </div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
+      >
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              Project Distribution Map
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {isClient && <ProjectDistributionMap locations={locations} />}
+          </CardContent>
+        </Card>
+      </motion.div>
 
       <div className="grid gap-8 md:grid-cols-2">
         <motion.div
@@ -154,8 +210,8 @@ export default function DashboardPage() {
                     <p className="text-2xl font-bold mt-1">{stats.total} clients</p>
                   </div>
                   <div className="p-4 bg-purple-50 dark:bg-purple-950 rounded-lg">
-                    <p className="text-sm text-purple-600 dark:text-purple-400">Project Types</p>
-                    <p className="text-2xl font-bold mt-1">3 Categories</p>
+                    <p className="text-sm text-purple-600 dark:text-purple-400">Locations Mapped</p>
+                    <p className="text-2xl font-bold mt-1">{locations.length} cities</p>
                   </div>
                 </div>
               ) : (
